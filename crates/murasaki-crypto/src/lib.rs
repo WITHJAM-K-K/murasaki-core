@@ -1,10 +1,12 @@
 pub mod error;
+pub mod hash;
 pub mod symmetric;
 pub mod kdf;
 pub mod hkdf_derive;
 pub mod key_hierarchy;
 pub mod recovery;
 
+pub use hash::hash_chunk;
 pub use symmetric::{encrypt_chunk, decrypt_chunk, FileKey};
 pub use kdf::{derive_password_key, PasswordKey, Argon2Params};
 pub use hkdf_derive::{derive_file_key, derive_share_key, MasterKey, ShareKey};

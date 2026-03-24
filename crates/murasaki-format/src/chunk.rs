@@ -1,5 +1,5 @@
 use crate::error::FormatError;
-use sha2::{Digest, Sha256};
+use murasaki_crypto::hash_chunk;
 
 pub const CHUNK_SIZE: usize = 4 * 1024 * 1024; // 4MB 不変条件
 
@@ -14,7 +14,7 @@ pub struct Chunk {
 impl Chunk {
     fn new(index: u32, src: &[u8]) -> Self {
         assert!(src.len() <= CHUNK_SIZE);
-        let hash = sha256(src);
+        let hash = hash_chunk(src);
         // スタックオーバーフローを避けるためヒープ上に確保
         let mut data: Box<[u8; CHUNK_SIZE]> = vec![0u8; CHUNK_SIZE]
             .into_boxed_slice()
@@ -28,12 +28,6 @@ impl Chunk {
             hash,
         }
     }
-}
-
-fn sha256(data: &[u8]) -> [u8; 32] {
-    let mut hasher = Sha256::new();
-    hasher.update(data);
-    hasher.finalize().into()
 }
 
 /// ファイルデータを4MB固定チャンクに分割する
@@ -120,7 +114,7 @@ mod tests {
     fn chunk_hash_matches_original_data() {
         let data = b"test data for hashing";
         let chunks = split(data);
-        let expected_hash = sha256(data);
+        let expected_hash = hash_chunk(data);
         assert_eq!(chunks[0].hash, expected_hash);
     }
 }

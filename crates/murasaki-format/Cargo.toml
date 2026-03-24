@@ -9,4 +9,4 @@ thiserror.workspace = true
 serde.workspace = true
 uuid.workspace = true
 bincode.workspace = true
-sha2.workspace = true
+murasaki-crypto = { path = "../murasaki-crypto" }
