@@ -8,11 +8,10 @@ use murasaki_format::types::{FileEntryId, ManifestRef, UuidBytes, VaultId};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Vault メタデータ（永続化される）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VaultMetadata {
     pub vault_id: VaultId,
-    pub wrapped_master_key: Vec<u8>, // nonce || ciphertext || tag
+    pub wrapped_master_key: Vec<u8>,
     pub argon_params: StoredArgon2Params,
 }
 
@@ -35,13 +34,11 @@ impl From<&StoredArgon2Params> for Argon2Params {
     }
 }
 
-/// アンロック中のセッション（master_key はメモリ内のみ）
 pub struct VaultSession {
     pub vault_id: VaultId,
     pub master_key: MasterKey,
 }
 
-/// FileEntry（ファイルメタデータ）
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FileEntry {
     pub file_entry_id: FileEntryId,
@@ -62,8 +59,7 @@ impl<S: StorageAdapter> VaultManager<S> {
         Self { storage }
     }
 
-    /// 新規 Vault を作成する
-    pub fn create_vault(
+    pub async fn create_vault(
         &self,
         password: &[u8],
     ) -> Result<(VaultMetadata, RecoverySeed), VaultError> {
@@ -81,15 +77,14 @@ impl<S: StorageAdapter> VaultManager<S> {
         let serialized = serde_json::to_vec(&metadata)
             .map_err(|e| VaultError::Storage(StorageError::OperationFailed(e.to_string())))?;
         let meta_id = string_to_uuid_bytes(VAULT_METADATA_KEY);
-        self.storage.put_manifest(&meta_id, &serialized)?;
+        self.storage.put_manifest(&meta_id, &serialized).await?;
 
         Ok((metadata, recovery_seed))
     }
 
-    /// パスワードで Vault をアンロックする
-    pub fn unlock(&self, password: &[u8]) -> Result<VaultSession, VaultError> {
+    pub async fn unlock(&self, password: &[u8]) -> Result<VaultSession, VaultError> {
         let meta_id = string_to_uuid_bytes(VAULT_METADATA_KEY);
-        let data = self.storage.get_manifest(&meta_id)?;
+        let data = self.storage.get_manifest(&meta_id).await?;
         let metadata: VaultMetadata = serde_json::from_slice(&data)
             .map_err(|e| VaultError::Storage(StorageError::OperationFailed(e.to_string())))?;
 
@@ -132,30 +127,30 @@ mod tests {
     use super::*;
     use crate::storage::InMemoryStorageAdapter;
 
-    #[test]
-    fn create_vault_returns_metadata_and_seed() {
+    #[tokio::test]
+    async fn create_vault_returns_metadata_and_seed() {
         let storage = InMemoryStorageAdapter::new();
         let vault = VaultManager::new(storage);
-        let (metadata, seed) = vault.create_vault(b"my-password").unwrap();
+        let (metadata, seed) = vault.create_vault(b"my-password").await.unwrap();
         assert!(!metadata.wrapped_master_key.is_empty());
         assert_eq!(seed.as_str().split_whitespace().count(), 24);
     }
 
-    #[test]
-    fn unlock_with_correct_password_returns_session() {
+    #[tokio::test]
+    async fn unlock_with_correct_password_returns_session() {
         let storage = InMemoryStorageAdapter::new();
         let vault = VaultManager::new(storage);
-        vault.create_vault(b"my-password").unwrap();
-        let session = vault.unlock(b"my-password").unwrap();
+        vault.create_vault(b"my-password").await.unwrap();
+        let session = vault.unlock(b"my-password").await.unwrap();
         assert!(!session.master_key.as_bytes().iter().all(|&b| b == 0));
     }
 
-    #[test]
-    fn unlock_with_wrong_password_returns_error() {
+    #[tokio::test]
+    async fn unlock_with_wrong_password_returns_error() {
         let storage = InMemoryStorageAdapter::new();
         let vault = VaultManager::new(storage);
-        vault.create_vault(b"my-password").unwrap();
-        let result = vault.unlock(b"wrong-password");
+        vault.create_vault(b"my-password").await.unwrap();
+        let result = vault.unlock(b"wrong-password").await;
         assert!(matches!(result, Err(VaultError::UnlockFailed)));
     }
 }

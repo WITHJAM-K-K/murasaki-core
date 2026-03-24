@@ -7,11 +7,11 @@ use murasaki_core::{
 use murasaki_crypto::{generate_master_key, generate_recovery_seed};
 
 /// ファイル暗号化 → 保存 → 復号のラウンドトリップ
-#[test]
-fn file_encrypt_decrypt_lifecycle() {
+#[tokio::test]
+async fn file_encrypt_decrypt_lifecycle() {
     let vault_mgr = VaultManager::new(InMemoryStorageAdapter::new());
-    vault_mgr.create_vault(b"lifecycle-pass").unwrap();
-    let session = vault_mgr.unlock(b"lifecycle-pass").unwrap();
+    vault_mgr.create_vault(b"lifecycle-pass").await.unwrap();
+    let session = vault_mgr.unlock(b"lifecycle-pass").await.unwrap();
 
     let file_storage = InMemoryStorageAdapter::new();
     let service = FileService::new(&session, &file_storage);
@@ -19,28 +19,29 @@ fn file_encrypt_decrypt_lifecycle() {
     let original_data = b"Hello, zero-knowledge world!".to_vec();
     let file_entry_id = service
         .encrypt_file(&original_data, "test.txt", "text/plain")
+        .await
         .unwrap();
-    let recovered = service.decrypt_file(&file_entry_id).unwrap();
+    let recovered = service.decrypt_file(&file_entry_id).await.unwrap();
     assert_eq!(recovered, original_data);
 }
 
 /// Vault 作成 → アンロック → ファイル操作 → 不正パスワードでアンロック失敗
-#[test]
-fn vault_create_lock_unlock_file_ops() {
+#[tokio::test]
+async fn vault_create_lock_unlock_file_ops() {
     let vault_mgr = VaultManager::new(InMemoryStorageAdapter::new());
 
-    let (_, _recovery_seed) = vault_mgr.create_vault(b"secure-password").unwrap();
+    let (_, _recovery_seed) = vault_mgr.create_vault(b"secure-password").await.unwrap();
 
-    let session = vault_mgr.unlock(b"secure-password").unwrap();
+    let session = vault_mgr.unlock(b"secure-password").await.unwrap();
 
     let file_storage = InMemoryStorageAdapter::new();
     let service = FileService::new(&session, &file_storage);
     let data = b"confidential content".to_vec();
-    let file_id = service.encrypt_file(&data, "secret.txt", "text/plain").unwrap();
-    let decrypted = service.decrypt_file(&file_id).unwrap();
+    let file_id = service.encrypt_file(&data, "secret.txt", "text/plain").await.unwrap();
+    let decrypted = service.decrypt_file(&file_id).await.unwrap();
     assert_eq!(decrypted, data);
 
-    let result = vault_mgr.unlock(b"wrong-password");
+    let result = vault_mgr.unlock(b"wrong-password").await;
     assert!(result.is_err());
 }
 
