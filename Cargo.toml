@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/murasaki-crypto",
+    "crates/murasaki-format",
+    "crates/murasaki-core",
+    "crates/murasaki-wasm",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/murasaki-dev/murasaki-core"
+
+[workspace.dependencies]
+thiserror = "2"
+zeroize = { version = "1", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+uuid = { version = "1", features = ["v4", "serde", "js"] }
+aes-gcm = "0.10.3"
+argon2 = "0.5"
+hkdf = "0.12.4"
+sha2 = "0.10.9"
+tiny-bip39 = "2.0.0"
+bincode = "2"
+serde_json = "1"
+wasm-bindgen = "0.2.105"
+getrandom = { version = "0.2", features = ["js"] }
