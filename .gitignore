@@ -31,3 +31,6 @@ secrets/
 
 # Claude Code internal（ローカル設定）
 .claude/
+
+# Kiro IDE（ローカル設定・仕様書）
+.kiro/
