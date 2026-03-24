@@ -1,0 +1,19 @@
+[package]
+name = "murasaki-wasm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+murasaki-crypto = { path = "../murasaki-crypto" }
+murasaki-core = { path = "../murasaki-core" }
+thiserror.workspace = true
+zeroize.workspace = true
+wasm-bindgen.workspace = true
+getrandom.workspace = true
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
