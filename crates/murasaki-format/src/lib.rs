@@ -2,7 +2,9 @@ pub mod error;
 pub mod types;
 pub mod codec;
 pub mod chunk;
+pub mod splitter;
 
+pub use splitter::{ChunkSplitter, DefaultChunkSplitter};
 pub use types::{VaultObject, VaultManifest, VaultShare, VaultId, ObjectId, FileEntryId, ManifestRef, ShareId, ChunkHash, UuidBytes};
 pub use codec::{
     encode_vault_object, decode_vault_object,

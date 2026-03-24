@@ -1,6 +1,6 @@
 use murasaki_core::{
     file_ops::FileService,
-    recovery::RecoveryService,
+    recovery::{DefaultRecoveryService, RecoveryService},
     storage::InMemoryStorageAdapter,
     vault::VaultManager,
 };
@@ -55,13 +55,15 @@ fn recovery_seed_generate_and_restore() {
 
     assert_eq!(mnemonic.split_whitespace().count(), 24);
 
-    let recovered = RecoveryService::recover(&mnemonic).unwrap();
+    let svc = DefaultRecoveryService;
+    let recovered = svc.recover(&mnemonic).unwrap();
     assert_eq!(recovered.as_bytes(), &original_bytes);
 }
 
 /// 不正な recovery seed はエラーを返す
 #[test]
 fn invalid_recovery_seed_returns_error() {
-    let result = RecoveryService::recover("abandon abandon abandon");
+    let svc = DefaultRecoveryService;
+    let result = svc.recover("abandon abandon abandon");
     assert!(result.is_err());
 }
