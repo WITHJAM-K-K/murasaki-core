@@ -1,5 +1,5 @@
 use crate::error::CryptoError;
-use argon2::{Argon2, Algorithm, Version, Params};
+use argon2::{Algorithm, Argon2, Params, Version};
 use zeroize::Zeroizing;
 
 pub struct PasswordKey(pub Zeroizing<[u8; 32]>);
@@ -28,7 +28,10 @@ impl Default for Argon2Params {
     }
 }
 
-pub fn derive_password_key(password: &[u8], params: &Argon2Params) -> Result<PasswordKey, CryptoError> {
+pub fn derive_password_key(
+    password: &[u8],
+    params: &Argon2Params,
+) -> Result<PasswordKey, CryptoError> {
     let argon2_params = Params::new(params.m_cost, params.t_cost, params.p_cost, Some(32))
         .map_err(|_| CryptoError::EncryptionFailed)?;
     let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, argon2_params);
@@ -45,7 +48,7 @@ mod tests {
 
     fn test_params() -> Argon2Params {
         Argon2Params {
-            m_cost: 8,    // テスト用に最小値
+            m_cost: 8, // テスト用に最小値
             t_cost: 1,
             p_cost: 1,
             salt: [0x11u8; 32],

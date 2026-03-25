@@ -21,8 +21,8 @@ impl FileKey {
 
 /// 暗号化: nonce(12B) || ciphertext || tag(16B) 形式で返す
 pub fn encrypt_chunk(plaintext: &[u8], key: &FileKey) -> Result<Vec<u8>, CryptoError> {
-    let cipher = Aes256Gcm::new_from_slice(key.as_bytes())
-        .map_err(|_| CryptoError::EncryptionFailed)?;
+    let cipher =
+        Aes256Gcm::new_from_slice(key.as_bytes()).map_err(|_| CryptoError::EncryptionFailed)?;
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
     let ciphertext = cipher
         .encrypt(&nonce, plaintext)
@@ -41,8 +41,8 @@ pub fn decrypt_chunk(data: &[u8], key: &FileKey) -> Result<Vec<u8>, CryptoError>
     }
     let (nonce_bytes, ciphertext) = data.split_at(NONCE_SIZE);
     let nonce = Nonce::from_slice(nonce_bytes);
-    let cipher = Aes256Gcm::new_from_slice(key.as_bytes())
-        .map_err(|_| CryptoError::DecryptionFailed)?;
+    let cipher =
+        Aes256Gcm::new_from_slice(key.as_bytes()).map_err(|_| CryptoError::DecryptionFailed)?;
     cipher
         .decrypt(nonce, ciphertext)
         .map_err(|_| CryptoError::DecryptionFailed)

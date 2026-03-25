@@ -3,7 +3,9 @@ use crate::storage::StorageAdapter;
 use crate::vault::{FileEntry, VaultSession};
 use murasaki_crypto::{decrypt_chunk, derive_file_key, encrypt_chunk, hash_chunk};
 use murasaki_format::{
-    codec::{decode_vault_manifest, decode_vault_object, encode_vault_manifest, encode_vault_object},
+    codec::{
+        decode_vault_manifest, decode_vault_object, encode_vault_manifest, encode_vault_object,
+    },
     types::{ChunkHash, FileEntryId, ManifestRef, ObjectId, VaultManifest, VaultObject},
 };
 use serde::{Deserialize, Serialize};
@@ -35,7 +37,10 @@ impl<'a, S: StorageAdapter> FileService<'a, S> {
         Self { storage, session }
     }
 
-    fn derive_key_for(&self, file_entry_id: &FileEntryId) -> Result<murasaki_crypto::FileKey, VaultError> {
+    fn derive_key_for(
+        &self,
+        file_entry_id: &FileEntryId,
+    ) -> Result<murasaki_crypto::FileKey, VaultError> {
         Ok(derive_file_key(&self.session.master_key, &file_entry_id.0)?)
     }
 
@@ -97,7 +102,9 @@ impl<'a, S: StorageAdapter> FileService<'a, S> {
             ciphertext: encrypted_manifest,
         };
         let encoded_manifest = encode_vault_manifest(&vault_manifest)?;
-        self.storage.put_manifest(&manifest_ref, &encoded_manifest).await?;
+        self.storage
+            .put_manifest(&manifest_ref, &encoded_manifest)
+            .await?;
 
         let file_entry = FileEntry {
             file_entry_id,
@@ -109,7 +116,9 @@ impl<'a, S: StorageAdapter> FileService<'a, S> {
         let file_entry_json = serde_json::to_vec(&file_entry)
             .map_err(|e| VaultError::Storage(StorageError::OperationFailed(e.to_string())))?;
         let entry_key = file_entry_id;
-        self.storage.put_manifest(&entry_key, &file_entry_json).await?;
+        self.storage
+            .put_manifest(&entry_key, &file_entry_json)
+            .await?;
 
         Ok(file_entry_id)
     }
@@ -175,7 +184,10 @@ mod tests {
         let service = FileService::new(&session, &storage);
 
         let data = b"Hello, murasaki!".to_vec();
-        let file_entry_id = service.encrypt_file(&data, "hello.txt", "text/plain").await.unwrap();
+        let file_entry_id = service
+            .encrypt_file(&data, "hello.txt", "text/plain")
+            .await
+            .unwrap();
         let recovered = service.decrypt_file(&file_entry_id).await.unwrap();
         assert_eq!(recovered, data);
     }
@@ -200,11 +212,17 @@ mod tests {
         let service = FileService::new(&session, &storage);
 
         let data = b"tamper test".to_vec();
-        let file_entry_id = service.encrypt_file(&data, "test.txt", "text/plain").await.unwrap();
+        let file_entry_id = service
+            .encrypt_file(&data, "test.txt", "text/plain")
+            .await
+            .unwrap();
 
         let objects = storage.list_objects().await.unwrap();
         if let Some(obj_id) = objects.first() {
-            storage.put_object(obj_id, b"corrupted data that is invalid").await.unwrap();
+            storage
+                .put_object(obj_id, b"corrupted data that is invalid")
+                .await
+                .unwrap();
         }
 
         let result = service.decrypt_file(&file_entry_id).await;

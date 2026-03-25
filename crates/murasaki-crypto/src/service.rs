@@ -1,9 +1,9 @@
+use crate::hash::hash_chunk;
 use crate::{
     decrypt_chunk, derive_password_key, encrypt_chunk, generate_file_key, generate_master_key,
     generate_recovery_seed, recover_master_key, unwrap_key, wrap_key, Argon2Params, CryptoError,
     FileKey, MasterKey, PasswordKey, RecoverySeed, WrappedKey,
 };
-use crate::hash::hash_chunk;
 
 /// 暗号プリミティブ・鍵階層管理の統合サービストレイト
 ///
@@ -12,9 +12,21 @@ use crate::hash::hash_chunk;
 pub trait CryptoService {
     fn generate_master_key(&self) -> Result<MasterKey, CryptoError>;
     fn generate_file_key(&self) -> Result<FileKey, CryptoError>;
-    fn derive_password_key(&self, password: &[u8], params: &Argon2Params) -> Result<PasswordKey, CryptoError>;
-    fn wrap_key(&self, master_key: &MasterKey, password_key: &PasswordKey) -> Result<WrappedKey, CryptoError>;
-    fn unwrap_key(&self, wrapped: &WrappedKey, password_key: &PasswordKey) -> Result<MasterKey, CryptoError>;
+    fn derive_password_key(
+        &self,
+        password: &[u8],
+        params: &Argon2Params,
+    ) -> Result<PasswordKey, CryptoError>;
+    fn wrap_key(
+        &self,
+        master_key: &MasterKey,
+        password_key: &PasswordKey,
+    ) -> Result<WrappedKey, CryptoError>;
+    fn unwrap_key(
+        &self,
+        wrapped: &WrappedKey,
+        password_key: &PasswordKey,
+    ) -> Result<MasterKey, CryptoError>;
     fn encrypt_chunk(&self, plaintext: &[u8], key: &FileKey) -> Result<Vec<u8>, CryptoError>;
     fn decrypt_chunk(&self, ciphertext: &[u8], key: &FileKey) -> Result<Vec<u8>, CryptoError>;
     fn generate_recovery_seed(&self, master_key: &MasterKey) -> Result<RecoverySeed, CryptoError>;
@@ -34,15 +46,27 @@ impl CryptoService for DefaultCryptoService {
         generate_file_key()
     }
 
-    fn derive_password_key(&self, password: &[u8], params: &Argon2Params) -> Result<PasswordKey, CryptoError> {
+    fn derive_password_key(
+        &self,
+        password: &[u8],
+        params: &Argon2Params,
+    ) -> Result<PasswordKey, CryptoError> {
         derive_password_key(password, params)
     }
 
-    fn wrap_key(&self, master_key: &MasterKey, password_key: &PasswordKey) -> Result<WrappedKey, CryptoError> {
+    fn wrap_key(
+        &self,
+        master_key: &MasterKey,
+        password_key: &PasswordKey,
+    ) -> Result<WrappedKey, CryptoError> {
         wrap_key(master_key, password_key)
     }
 
-    fn unwrap_key(&self, wrapped: &WrappedKey, password_key: &PasswordKey) -> Result<MasterKey, CryptoError> {
+    fn unwrap_key(
+        &self,
+        wrapped: &WrappedKey,
+        password_key: &PasswordKey,
+    ) -> Result<MasterKey, CryptoError> {
         unwrap_key(wrapped, password_key)
     }
 

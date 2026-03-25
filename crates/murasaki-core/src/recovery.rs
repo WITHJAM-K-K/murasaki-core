@@ -11,8 +11,8 @@ pub struct DefaultRecoveryService;
 
 impl RecoveryService for DefaultRecoveryService {
     fn recover(&self, mnemonic: &str) -> Result<MasterKey, RecoveryError> {
-        let seed = RecoverySeed::from_phrase(mnemonic)
-            .map_err(|_| RecoveryError::InvalidRecoverySeed)?;
+        let seed =
+            RecoverySeed::from_phrase(mnemonic).map_err(|_| RecoveryError::InvalidRecoverySeed)?;
         Ok(recover_master_key(&seed)?)
     }
 }
