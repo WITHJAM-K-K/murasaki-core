@@ -17,3 +17,4 @@ async-trait.workspace = true
 
 [dev-dependencies]
 tokio.workspace = true
+cargo-husky = { version = "1", default-features = false, features = ["user-hooks"] }
