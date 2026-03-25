@@ -29,7 +29,12 @@ pub fn derive_password_key_wasm(password: &[u8], params: &[u8]) -> Result<Vec<u8
     let mut salt = [0u8; 32];
     salt.copy_from_slice(&params[12..44]);
 
-    let argon_params = Argon2Params { m_cost, t_cost, p_cost, salt };
+    let argon_params = Argon2Params {
+        m_cost,
+        t_cost,
+        p_cost,
+        salt,
+    };
     let key = derive_password_key(password, &argon_params).map_err(to_js_err)?;
     Ok(key.as_bytes().to_vec())
 }

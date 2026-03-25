@@ -5,8 +5,8 @@ use wasm_bindgen_test::*;
 wasm_bindgen_test_configure!(run_in_browser);
 
 use murasaki_wasm::{
-    decrypt_chunk_wasm, encrypt_chunk_wasm, generate_master_key_wasm,
-    generate_recovery_seed_wasm, recover_master_key_wasm, unwrap_key_wasm, wrap_key_wasm,
+    decrypt_chunk_wasm, encrypt_chunk_wasm, generate_master_key_wasm, generate_recovery_seed_wasm,
+    recover_master_key_wasm, unwrap_key_wasm, wrap_key_wasm,
 };
 
 #[wasm_bindgen_test]
