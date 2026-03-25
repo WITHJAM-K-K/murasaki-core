@@ -1,5 +1,4 @@
 use crate::error::FormatError;
-use bincode::{config, Decode, Encode};
 use serde::{Deserialize, Serialize};
 
 const VOBJ_VERSION: u8 = 1;
@@ -8,19 +7,16 @@ const VSHR_VERSION: u8 = 1;
 
 pub fn encode<T>(value: &T) -> Result<Vec<u8>, FormatError>
 where
-    T: Serialize + Encode,
+    T: Serialize,
 {
-    bincode::encode_to_vec(value, config::standard())
-        .map_err(|e| FormatError::ParseError(e.to_string()))
+    postcard::to_allocvec(value).map_err(|e| FormatError::ParseError(e.to_string()))
 }
 
 pub fn decode<T>(bytes: &[u8]) -> Result<T, FormatError>
 where
-    T: for<'de> Deserialize<'de> + Decode<()>,
+    T: for<'de> Deserialize<'de>,
 {
-    let (value, _) = bincode::decode_from_slice(bytes, config::standard())
-        .map_err(|e| FormatError::ParseError(e.to_string()))?;
-    Ok(value)
+    postcard::from_bytes(bytes).map_err(|e| FormatError::ParseError(e.to_string()))
 }
 
 pub fn encode_vault_object(obj: &crate::types::VaultObject) -> Result<Vec<u8>, FormatError> {
