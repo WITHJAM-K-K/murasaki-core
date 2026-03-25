@@ -124,7 +124,10 @@ mod tests {
         let id = test_object_id();
         store.put_object(&id, b"data").await.unwrap();
         store.delete_object(&id).await.unwrap();
-        assert!(matches!(store.get_object(&id).await, Err(StorageError::NotFound)));
+        assert!(matches!(
+            store.get_object(&id).await,
+            Err(StorageError::NotFound)
+        ));
     }
 
     #[tokio::test]

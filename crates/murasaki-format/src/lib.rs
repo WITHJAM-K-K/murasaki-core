@@ -1,17 +1,19 @@
-pub mod error;
-pub mod types;
-pub mod codec;
 pub mod chunk;
+pub mod codec;
+pub mod error;
 pub mod splitter;
+pub mod types;
 
-pub use splitter::{ChunkSplitter, DefaultChunkSplitter};
-pub use types::{VaultObject, VaultManifest, VaultShare, VaultId, ObjectId, FileEntryId, ManifestRef, ShareId, ChunkHash, UuidBytes};
 pub use codec::{
-    encode_vault_object, decode_vault_object,
-    encode_vault_manifest, decode_vault_manifest,
-    encode_vault_share, decode_vault_share,
+    decode_vault_manifest, decode_vault_object, decode_vault_share, encode_vault_manifest,
+    encode_vault_object, encode_vault_share,
 };
 pub use error::FormatError;
+pub use splitter::{ChunkSplitter, DefaultChunkSplitter};
+pub use types::{
+    ChunkHash, FileEntryId, ManifestRef, ObjectId, ShareId, UuidBytes, VaultId, VaultManifest,
+    VaultObject, VaultShare,
+};
 
 #[cfg(test)]
 mod tests {
@@ -75,7 +77,13 @@ mod tests {
         let mut obj = sample_vault_object();
         obj.version = 2; // 不正なバージョン
         let result = encode_vault_object(&obj);
-        assert!(matches!(result, Err(FormatError::VersionMismatch { expected: 1, found: 2 })));
+        assert!(matches!(
+            result,
+            Err(FormatError::VersionMismatch {
+                expected: 1,
+                found: 2
+            })
+        ));
     }
 
     #[test]
@@ -90,7 +98,13 @@ mod tests {
         let mut manifest = sample_vault_manifest();
         manifest.version = 99;
         let result = encode_vault_manifest(&manifest);
-        assert!(matches!(result, Err(FormatError::VersionMismatch { expected: 1, found: 99 })));
+        assert!(matches!(
+            result,
+            Err(FormatError::VersionMismatch {
+                expected: 1,
+                found: 99
+            })
+        ));
     }
 
     #[test]
@@ -98,6 +112,12 @@ mod tests {
         let mut share = sample_vault_share();
         share.version = 0;
         let result = encode_vault_share(&share);
-        assert!(matches!(result, Err(FormatError::VersionMismatch { expected: 1, found: 0 })));
+        assert!(matches!(
+            result,
+            Err(FormatError::VersionMismatch {
+                expected: 1,
+                found: 0
+            })
+        ));
     }
 }

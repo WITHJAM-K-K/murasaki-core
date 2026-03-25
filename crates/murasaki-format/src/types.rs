@@ -18,20 +18,27 @@ impl From<UuidBytes> for Uuid {
 }
 
 impl bincode::Encode for UuidBytes {
-    fn encode<E: bincode::enc::Encoder>(&self, encoder: &mut E) -> Result<(), bincode::error::EncodeError> {
+    fn encode<E: bincode::enc::Encoder>(
+        &self,
+        encoder: &mut E,
+    ) -> Result<(), bincode::error::EncodeError> {
         bincode::Encode::encode(&self.0, encoder)
     }
 }
 
 impl<Context> bincode::Decode<Context> for UuidBytes {
-    fn decode<D: bincode::de::Decoder<Context = Context>>(decoder: &mut D) -> Result<Self, bincode::error::DecodeError> {
+    fn decode<D: bincode::de::Decoder<Context = Context>>(
+        decoder: &mut D,
+    ) -> Result<Self, bincode::error::DecodeError> {
         let bytes: [u8; 16] = bincode::Decode::decode(decoder)?;
         Ok(UuidBytes(bytes))
     }
 }
 
 impl<'de, Context> bincode::BorrowDecode<'de, Context> for UuidBytes {
-    fn borrow_decode<D: bincode::de::BorrowDecoder<'de, Context = Context>>(decoder: &mut D) -> Result<Self, bincode::error::DecodeError> {
+    fn borrow_decode<D: bincode::de::BorrowDecoder<'de, Context = Context>>(
+        decoder: &mut D,
+    ) -> Result<Self, bincode::error::DecodeError> {
         let bytes: [u8; 16] = bincode::BorrowDecode::borrow_decode(decoder)?;
         Ok(UuidBytes(bytes))
     }

@@ -37,7 +37,10 @@ async fn vault_create_lock_unlock_file_ops() {
     let file_storage = InMemoryStorageAdapter::new();
     let service = FileService::new(&session, &file_storage);
     let data = b"confidential content".to_vec();
-    let file_id = service.encrypt_file(&data, "secret.txt", "text/plain").await.unwrap();
+    let file_id = service
+        .encrypt_file(&data, "secret.txt", "text/plain")
+        .await
+        .unwrap();
     let decrypted = service.decrypt_file(&file_id).await.unwrap();
     assert_eq!(decrypted, data);
 

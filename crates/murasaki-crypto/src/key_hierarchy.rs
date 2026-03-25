@@ -35,7 +35,10 @@ pub fn generate_file_key() -> Result<FileKey, CryptoError> {
 }
 
 /// master key を password key で AES-256-GCM ラップする
-pub fn wrap_key(master_key: &MasterKey, password_key: &PasswordKey) -> Result<WrappedKey, CryptoError> {
+pub fn wrap_key(
+    master_key: &MasterKey,
+    password_key: &PasswordKey,
+) -> Result<WrappedKey, CryptoError> {
     let cipher = Aes256Gcm::new_from_slice(password_key.as_bytes())
         .map_err(|_| CryptoError::EncryptionFailed)?;
     let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
@@ -50,7 +53,10 @@ pub fn wrap_key(master_key: &MasterKey, password_key: &PasswordKey) -> Result<Wr
 }
 
 /// ラップ済み master key をアンラップする
-pub fn unwrap_key(wrapped: &WrappedKey, password_key: &PasswordKey) -> Result<MasterKey, CryptoError> {
+pub fn unwrap_key(
+    wrapped: &WrappedKey,
+    password_key: &PasswordKey,
+) -> Result<MasterKey, CryptoError> {
     let data = wrapped.as_bytes();
     if data.len() < NONCE_SIZE {
         return Err(CryptoError::UnwrapFailed);

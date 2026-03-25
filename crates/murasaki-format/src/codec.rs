@@ -44,7 +44,9 @@ pub fn decode_vault_object(bytes: &[u8]) -> Result<crate::types::VaultObject, Fo
     Ok(obj)
 }
 
-pub fn encode_vault_manifest(manifest: &crate::types::VaultManifest) -> Result<Vec<u8>, FormatError> {
+pub fn encode_vault_manifest(
+    manifest: &crate::types::VaultManifest,
+) -> Result<Vec<u8>, FormatError> {
     if manifest.version != VMAN_VERSION {
         return Err(FormatError::VersionMismatch {
             expected: VMAN_VERSION,

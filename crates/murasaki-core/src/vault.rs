@@ -1,8 +1,8 @@
 use crate::error::{StorageError, VaultError};
 use crate::storage::StorageAdapter;
 use murasaki_crypto::{
-    derive_password_key, generate_master_key, generate_recovery_seed,
-    unwrap_key, wrap_key, Argon2Params, MasterKey, RecoverySeed, WrappedKey,
+    derive_password_key, generate_master_key, generate_recovery_seed, unwrap_key, wrap_key,
+    Argon2Params, MasterKey, RecoverySeed, WrappedKey,
 };
 use murasaki_format::types::{FileEntryId, ManifestRef, UuidBytes, VaultId};
 use serde::{Deserialize, Serialize};
@@ -89,8 +89,8 @@ impl<S: StorageAdapter> VaultManager<S> {
             .map_err(|e| VaultError::Storage(StorageError::OperationFailed(e.to_string())))?;
 
         let argon_params: Argon2Params = (&metadata.argon_params).into();
-        let password_key = derive_password_key(password, &argon_params)
-            .map_err(|_| VaultError::UnlockFailed)?;
+        let password_key =
+            derive_password_key(password, &argon_params).map_err(|_| VaultError::UnlockFailed)?;
         let wrapped = WrappedKey(metadata.wrapped_master_key);
         let master_key =
             unwrap_key(&wrapped, &password_key).map_err(|_| VaultError::UnlockFailed)?;
