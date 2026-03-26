@@ -11,6 +11,7 @@ target/
 
 # WASM build outputs
 pkg/
+crates/murasaki-wasm/pkg/
 wasm-pack.log
 
 # IDE
